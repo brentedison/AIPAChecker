@@ -1,0 +1,62 @@
+Current State & Artifacts:
+We have developed a basic Minimum Viable Product (MVP) structured as a full-stack application:
+
+React Frontend: A user interface built with React and styled with Tailwind CSS. It includes a structured form for inputting patient and medication details, calls a backend API, and displays the results.
+
+Action: Please create a standard React project structure (e.g., using Vite or the default Replit React template). Place the following code into src/App.js:
+
+// PASTE THE REACT CODE FROM 'pa_checker_react_frontend' HERE
+
+Python Backend (Flask API): A simple Flask API that serves the PA checking logic.
+
+Action: Please create a Python file (e.g., main.py or app.py) with the following Flask code:
+
+# PASTE THE PYTHON FLASK CODE FROM 'pa_checker_python_backend' HERE
+
+Formulary Data (Simulated): The backend currently relies on a formulary.json file containing simulated data representing a small portion of the actual formulary rules.
+
+Action: Please create a file named formulary.json in the same directory as the Python backend script. Populate it with the following sample JSON data structure (or a more extensive sample if available):
+
+// PASTE THE SAMPLE JSON DATA FROM 'formulary_data_sample_json' HERE
+// (Ensure it's valid JSON format with double quotes)
+[
+    {
+        "name": "Qelbree",
+        "generic_name": "viloxazine",
+        "ndc": "SIMULATED_NDC_QELBREE",
+        "strengths": ["100 mg", "150 mg", "200 mg"],
+        "status": "Preferred",
+        "pa_required": true,
+        "pa_criteria_summary": "Prior Authorization Required.",
+        "quantity_limit": [
+            { "strength": ["100 mg", "150 mg"], "limit": 2, "unit": "EA", "per_days": 1 },
+            { "strength": ["200 mg"], "limit": 3, "unit": "EA", "per_days": 1 }
+        ],
+        "age_limit": { "type": "AGE*", "details": "See Preface Table for Age Limit. Requires PA." },
+        "step_therapy": null,
+        "alternatives": [],
+        "notes": ["Product subject to max fills per month"]
+    }
+    // ... Add more sample entries from formulary_data_sample_json ...
+]
+
+Action: Ensure the Python backend code correctly loads this formulary.json file.
+
+Source Document: The actual formulary rules are defined in a PDF document (WA_AHPDL_PDL_.pdf).
+
+Key Challenge:
+The biggest challenge is converting the comprehensive rules from the source PDF into the structured formulary.json format needed by the application. The current JSON is just a small simulation.
+
+Goals within Replit:
+
+Setup: Configure this Replit environment to correctly run both the React frontend and the Python/Flask backend simultaneously. Ensure the frontend can successfully make API calls to the backend. Install necessary dependencies (Flask, Flask-Cors for Python; standard React dependencies).
+
+Data Handling: Advise on the best way to manage the formulary.json data within Replit. Is loading from a file sufficient for now? Should Replit DB be considered later?
+
+PDF Parsing (Potential): Can Replit's tools or AI assist in extracting structured data from the source PDF (WA_AHPDL_PDL_.pdf) to populate formulary.json more accurately? What strategies or libraries (e.g., PyPDF2, pdfplumber in Python) would be best to try within this environment?
+
+Code Refinement: Review the provided React and Python code. Suggest improvements for clarity, error handling, or efficiency within the Replit context. For example, refine the Python rules engine logic in app.py.
+
+MVP Improvement: Help identify the next steps to make this MVP more robust (e.g., improving rule logic accuracy, adding more input fields relevant to PA criteria, enhancing error handling).
+
+Please help me set up this project structure and provide guidance on tackling the data challenge and improving the MVP in Replit.
