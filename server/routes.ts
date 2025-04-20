@@ -7,10 +7,6 @@ import fs from 'fs';
 import path from 'path';
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize formulary data from PDF
-  const medications = await initializeFormulary();
-  await storage.initializeMedications(medications);
-
   // API endpoints
   app.get('/api/medications', async (_req: Request, res: Response) => {
     try {
@@ -103,8 +99,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // In a real implementation, this would handle file upload and parsing
       // For this demo, we'll just re-initialize with our sample data
+      const { formularyId } = req.body;
+      
+      if (!formularyId) {
+        return res.status(400).json({ message: 'Formulary ID is required' });
+      }
+      
       const medications = await initializeFormulary();
-      await storage.initializeMedications(medications);
+      await storage.initializeMedications(medications, formularyId);
       res.json({ message: 'Formulary uploaded and processed successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Error uploading formulary' });

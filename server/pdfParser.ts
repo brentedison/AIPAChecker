@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import { Medication, Alternative } from '@shared/schema';
+import { Medication, AlternativeDTO, MedicationDTO, InsertMedication } from '@shared/schema';
 
 // Sample data to demonstrate structure - will be replaced by parsed data
-const mockData: Medication[] = [
+export const mockData: Medication[] = [
   {
     id: 1,
     name: 'atorvastatin',
