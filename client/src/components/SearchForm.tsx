@@ -10,6 +10,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,9 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Search, Settings } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Search, ChevronDown, ChevronUp, FileText, Filter, Calendar, TabletSmartphone, Pill } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SearchFormProps {
   drugClasses: string[];
@@ -29,15 +34,19 @@ interface SearchFormProps {
   onCategorySearch: (category: string) => void;
 }
 
+// Updated schema with more required fields for better PA determination
 const formSchema = z.object({
-  medicationName: z.string().optional(),
+  medicationName: z.string().min(2, { message: "Medication name is required" }).or(z.literal("")),
   drugClass: z.string().optional(),
-  patientAge: z.coerce.number().optional(),
+  patientAge: z.coerce.number().positive().int().optional(),
+  patientGender: z.enum(['male', 'female', 'other']).optional(),
   dosage: z.string().optional(),
-  quantity: z.coerce.number().optional(),
+  quantity: z.coerce.number().positive().int().optional(),
+  formularyId: z.coerce.number().default(1), // Default to first formulary for now
 });
 
 export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: SearchFormProps) {
+  const [activeTab, setActiveTab] = useState<string>("quick");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,8 +55,10 @@ export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: 
       medicationName: "",
       drugClass: "",
       patientAge: undefined,
+      patientGender: undefined,
       dosage: "",
       quantity: undefined,
+      formularyId: 1,
     },
   });
 
@@ -65,205 +76,327 @@ export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: 
   }
 
   return (
-    <Card className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <CardContent className="p-0">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-neutral-800 mb-2 font-inter">Check Prior Authorization Requirements</h2>
-          <p className="text-neutral-600">
-            Search for a medication to check if it requires prior authorization and view coverage details.
-          </p>
-        </div>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="medicationName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-neutral-800">Medication Name</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="Enter generic or brand name"
-                          className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                          {...field}
-                        />
-                        <Search className="absolute right-3 top-3 text-neutral-600 h-5 w-5" />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="drugClass"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-neutral-800">Drug Class (Optional)</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary">
-                          <SelectValue placeholder="All Classes" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="all-classes">All Classes</SelectItem>
-                        {drugClasses.map((drugClass) => (
-                          <SelectItem key={drugClass} value={drugClass}>
-                            {drugClass}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-            </div>
+    <Card className="bg-white rounded-lg shadow-md mb-8 border-t-4 border-t-[#0078D4]">
+      <CardHeader className="pb-0">
+        <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">
+          <FileText className="mr-2 h-5 w-5 text-[#0078D4]" />
+          Formulary Drug Lookup
+        </CardTitle>
+        <CardDescription className="text-gray-600">
+          Check coverage status, prior authorization requirements, and formulary alternatives
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="pt-4">
+        <Tabs defaultValue="quick" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="w-full grid grid-cols-2 mb-6">
+            <TabsTrigger value="quick" className="text-sm font-medium">
+              Quick Search
+            </TabsTrigger>
+            <TabsTrigger value="advanced" className="text-sm font-medium">
+              Advanced Search
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="quick" className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="medicationName"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-gray-700 font-medium">Drug Name</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Enter drug name (generic or brand)"
+                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4] pl-10"
+                              {...field}
+                            />
+                            <Search className="absolute left-3 top-3.5 text-gray-400 h-5 w-5" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClear}
+                    className="px-4 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="px-4 py-2 bg-[#0078D4] hover:bg-[#106EBE] text-white rounded-md font-medium shadow-sm"
+                  >
+                    Search
+                  </Button>
+                </div>
+              </form>
+            </Form>
             
-            {showAdvanced && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="patientAge"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-neutral-800">Patient Age (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Age in years"
-                          className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="dosage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-neutral-800">Dosage (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g., 20mg"
-                          className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-neutral-800">Quantity (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="e.g., 30"
-                          className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary focus:border-primary"
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
+            <Separator className="my-6" />
             
-            <div className="flex flex-wrap justify-between items-center">
-              <div className="flex items-center mb-4 md:mb-0">
-                <button
-                  type="button"
-                  className="text-[#0078D4] flex items-center font-medium"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                >
-                  <Settings className="mr-1 h-4 w-4" />
-                  Advanced Search Options
-                </button>
-              </div>
-              
-              <div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Browse by Common Categories</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {drugClasses.map((drugClass) => (
+                  <Button
+                    key={drugClass}
+                    type="button"
+                    variant="outline"
+                    onClick={() => onCategorySearch(drugClass)}
+                    className="justify-start text-left px-3 py-2 border border-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                  >
+                    <Pill className="mr-2 h-4 w-4 text-[#0078D4]" />
+                    {drugClass}
+                  </Button>
+                ))}
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleClear}
-                  className="px-5 py-2.5 border border-neutral-300 rounded-md mr-2 font-medium text-neutral-600 hover:bg-neutral-100"
+                  onClick={() => onCategorySearch("Requires PA")}
+                  className="justify-start text-left px-3 py-2 border border-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
                 >
-                  Clear
-                </Button>
-                <Button
-                  type="submit"
-                  className="px-5 py-2.5 bg-[#0078D4] hover:bg-[#41A3E3] text-white rounded-md font-medium shadow-sm"
-                >
-                  Search
+                  <Filter className="mr-2 h-4 w-4 text-orange-500" />
+                  Requires PA
                 </Button>
               </div>
             </div>
-          </form>
-        </Form>
-        
-        <Separator className="my-4" />
-        
-        <div>
-          <h3 className="text-sm font-medium text-neutral-600 mb-3 font-inter">Quick Search by Common Categories:</h3>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onCategorySearch("Antidiabetics")}
-              className="px-3 py-1.5 bg-blue-50 text-[#0078D4] rounded-full text-sm hover:bg-blue-100 transition-colors"
-            >
-              Antidiabetics
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onCategorySearch("Cardiovascular Agents")}
-              className="px-3 py-1.5 bg-blue-50 text-[#0078D4] rounded-full text-sm hover:bg-blue-100 transition-colors"
-            >
-              Antihypertensives
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onCategorySearch("Pain Management")}
-              className="px-3 py-1.5 bg-blue-50 text-[#0078D4] rounded-full text-sm hover:bg-blue-100 transition-colors"
-            >
-              Pain Management
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onCategorySearch("Mental Health")}
-              className="px-3 py-1.5 bg-blue-50 text-[#0078D4] rounded-full text-sm hover:bg-blue-100 transition-colors"
-            >
-              Mental Health
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onCategorySearch("Requires PA")}
-              className="px-3 py-1.5 bg-blue-50 text-[#0078D4] rounded-full text-sm hover:bg-blue-100 transition-colors"
-            >
-              Requires PA
-            </Button>
-          </div>
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="advanced" className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <FormField
+                    control={form.control}
+                    name="medicationName"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-gray-700 font-medium">
+                          Drug Name
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="ml-1 text-gray-400 cursor-help text-xs">ⓘ</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">Enter generic or brand name</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Enter drug name (generic or brand)"
+                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4] pl-10"
+                              {...field}
+                            />
+                            <Search className="absolute left-3 top-3.5 text-gray-400 h-5 w-5" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="drugClass"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-gray-700 font-medium">Drug Class</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4]">
+                              <SelectValue placeholder="Select drug class" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="all-classes">All Classes</SelectItem>
+                            {drugClasses.map((drugClass) => (
+                              <SelectItem key={drugClass} value={drugClass}>
+                                {drugClass}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700">Patient Information</h3>
+                    <button
+                      type="button"
+                      className="text-[#0078D4] text-sm flex items-center"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                    >
+                      {showAdvanced ? (
+                        <>Hide <ChevronUp className="ml-1 h-4 w-4" /></>
+                      ) : (
+                        <>Show <ChevronDown className="ml-1 h-4 w-4" /></>
+                      )}
+                    </button>
+                  </div>
+                  
+                  {showAdvanced && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="patientAge"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-gray-700 font-medium">
+                              <div className="flex items-center">
+                                <Calendar className="mr-1.5 h-4 w-4 text-gray-500" />
+                                Patient Age
+                              </div>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Age in years"
+                                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4]"
+                                value={field.value || ''}
+                                onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="patientGender"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-gray-700 font-medium">
+                              <div className="flex items-center">
+                                <TabletSmartphone className="mr-1.5 h-4 w-4 text-gray-500" />
+                                Patient Gender
+                              </div>
+                            </FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex space-x-4"
+                              >
+                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="male" />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    Male
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="female" />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    Female
+                                  </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem value="other" />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal">
+                                    Other
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4">Prescription Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="dosage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Dosage</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 20mg daily"
+                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Quantity</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="e.g., 30"
+                              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4]"
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div className="pt-2 flex items-center justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClear}
+                    className="px-4 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="px-4 py-2 bg-[#0078D4] hover:bg-[#106EBE] text-white rounded-md font-medium shadow-sm"
+                  >
+                    Check Coverage
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
