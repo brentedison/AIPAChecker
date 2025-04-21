@@ -103,7 +103,7 @@ export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: 
       </CardHeader>
       
       <CardContent className="pt-4">
-        <Tabs defaultValue="quick" className="w-full" onValueChange={setActiveTab}>
+        <Tabs defaultValue="advanced" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="w-full grid grid-cols-2 mb-6">
             <TabsTrigger value="quick" className="text-sm font-medium">
               Quick Search
@@ -191,6 +191,50 @@ export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: 
           <TabsContent value="advanced" className="space-y-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Formulary Selection */}
+                <div className="bg-blue-50 p-4 rounded-md border border-blue-200 mb-4">
+                  <FormField
+                    control={form.control}
+                    name="formularyId"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-gray-700 font-semibold flex items-center">
+                          <Book className="mr-2 h-4 w-4 text-blue-500" />
+                          Select Formulary
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="ml-1 text-gray-400 cursor-help text-xs">ⓘ</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">Choose the patient's specific formulary</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={(value) => field.onChange(parseInt(value))}
+                            value={field.value ? field.value.toString() : "1"}
+                          >
+                            <SelectTrigger className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0078D4] focus:border-[#0078D4]">
+                              <SelectValue placeholder="Select a formulary" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {formularies.map((formulary) => (
+                                <SelectItem key={formulary.id} value={formulary.id.toString()}>
+                                  {formulary.name} {formulary.year ? `(${formulary.year})` : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <FormField
                     control={form.control}

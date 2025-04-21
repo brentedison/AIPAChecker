@@ -1,4 +1,4 @@
-import MolinaLogo from "@/assets/MolinaLogo";
+import AppLogo from "@/assets/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Upload, HelpCircle } from "lucide-react";
 
@@ -12,10 +12,10 @@ export default function Header({ onHelpClick, onUploadClick }: HeaderProps) {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center mb-4 md:mb-0">
-          <MolinaLogo className="w-12 h-12 mr-3" />
+          <AppLogo className="w-12 h-12 mr-3" />
           <div>
             <h1 className="text-xl font-bold text-neutral-800 font-inter">Prior Authorization Checker</h1>
-            <p className="text-sm text-neutral-600">Molina Healthcare Washington Apple Health 2025</p>
+            <p className="text-sm text-neutral-600">Formulary Coverage & PA Requirements</p>
           </div>
         </div>
         <div className="flex items-center">

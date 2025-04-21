@@ -39,14 +39,16 @@ export default function HelpModal({ onClose }: HelpModalProps) {
           <h3 className="text-lg font-medium text-neutral-800">How to Use This Tool</h3>
           <p>
             This application allows you to check if a medication requires Prior
-            Authorization (PA) based on the Molina Washington Apple Health 2025
-            formulary.
+            Authorization (PA) based on multiple formularies. Select the specific
+            formulary that applies to your patient for accurate results.
           </p>
 
-          <h4 className="text-base font-medium text-neutral-800 mt-4">Basic Search</h4>
+          <h4 className="text-base font-medium text-neutral-800 mt-4">Advanced Search</h4>
           <ol className="list-decimal ml-5 space-y-1">
+            <li>Select the appropriate formulary for your patient</li>
             <li>Enter a medication name (generic or brand)</li>
-            <li>Optionally select a drug class to narrow results</li>
+            <li>Provide patient demographics (age, gender) for accurate PA prediction</li>
+            <li>Enter dosing information to check for quantity limits</li>
             <li>Click "Search" to see coverage details</li>
           </ol>
 

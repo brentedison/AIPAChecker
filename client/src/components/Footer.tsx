@@ -4,16 +4,16 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-inter">Molina Healthcare</h3>
+            <h3 className="text-lg font-semibold mb-4 font-inter">PA Checker</h3>
             <p className="text-neutral-300 text-sm">
-              This tool is based on the 2025 Molina Healthcare of Washington Apple Health (Medicaid) Preferred Drug List.
+              This tool allows you to check coverage and prior authorization requirements across multiple formularies.
             </p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4 font-inter">Important Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="https://www.molinahealthcare.com/" className="text-neutral-300 hover:text-white">
+                <a href="#" className="text-neutral-300 hover:text-white">
                   Provider Portal
                 </a>
               </li>
@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 pt-4 border-t border-neutral-600 text-center text-sm text-neutral-400">
-          <p>© 2025 Molina Healthcare, Inc. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} Formulary PA Checker. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
