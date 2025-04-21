@@ -254,5 +254,29 @@ export const PASubmissionInfoSchema = z.object({
 
 export type PASubmissionInfo = z.infer<typeof PASubmissionInfoSchema>;
 
+// Schema for AI-generated Prior Authorization decisions
+export const PADecisionResponseSchema = z.object({
+  decision: z.enum(["APPROVED", "DENIED", "NEEDS_REVIEW"]),
+  confidence: z.number().min(0).max(1),
+  rationale: z.string(),
+  missingInformation: z.array(z.string()).optional().default([]),
+  suggestedAlternatives: z.array(z.string()).optional().default([]),
+});
+
+export type PADecisionResponse = z.infer<typeof PADecisionResponseSchema>;
+
+// Schema for submitting a PA request to the AI service
+export const PARequestSchema = z.object({
+  medicationId: z.number(),
+  formularyId: z.number(),
+  patientAge: z.number().optional(),
+  patientGender: z.string().optional(),
+  diagnosisCode: z.string().optional(),
+  dosage: z.string().optional(),
+  quantity: z.number().optional(),
+});
+
+export type PARequest = z.infer<typeof PARequestSchema>;
+
 export const drugClassesSchema = z.array(z.string());
 export type DrugClasses = z.infer<typeof drugClassesSchema>;

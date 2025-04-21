@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { PADecisionResponse, MedicationDTO } from '@shared/schema';
+import { PADecisionResponse, PADecisionResponseSchema, MedicationDTO } from '@shared/schema';
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 const anthropic = new Anthropic({
@@ -57,16 +57,30 @@ export class AIService {
         ],
       });
 
-      // Parse the AI response
+      // Parse the AI response from the first content block
       try {
-        const result = JSON.parse(response.content[0].text);
-        return {
+        // Access the content properly depending on the type of content block
+        let responseText = '';
+        
+        if (response.content[0].type === 'text') {
+          responseText = response.content[0].text;
+        } else {
+          console.error("Unexpected response content type:", response.content[0].type);
+          throw new Error("Invalid response format");
+        }
+        
+        const result = JSON.parse(responseText);
+        
+        // Validate the response against our schema
+        const validatedResponse = PADecisionResponseSchema.parse({
           decision: result.decision,
           confidence: result.confidence,
           rationale: result.rationale,
           missingInformation: result.missingInformation || [],
           suggestedAlternatives: result.suggestedAlternatives || [],
-        };
+        });
+        
+        return validatedResponse;
       } catch (parseError) {
         console.error("Failed to parse AI response:", parseError);
         return {

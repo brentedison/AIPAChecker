@@ -1,10 +1,11 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { searchQuerySchema } from "@shared/schema";
+import { searchQuerySchema, PARequestSchema } from "@shared/schema";
 import { initializeFormulary } from "./pdfParser";
 import fs from 'fs';
 import path from 'path';
+import { aiService } from "./services/aiService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoints
@@ -122,6 +123,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: 'Formulary uploaded and processed successfully' });
     } catch (error) {
       res.status(500).json({ message: 'Error uploading formulary' });
+    }
+  });
+
+  // AI-powered Prior Authorization endpoint
+  app.post('/api/analyze-pa', async (req: Request, res: Response) => {
+    try {
+      // Validate the request body
+      const parseResult = PARequestSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: 'Invalid PA request data', 
+          errors: parseResult.error.format() 
+        });
+      }
+      
+      const paRequest = parseResult.data;
+      
+      // Get the medication details
+      const medication = await storage.getMedicationById(paRequest.medicationId);
+      if (!medication) {
+        return res.status(404).json({ message: 'Medication not found' });
+      }
+      
+      // If the medication doesn't require PA, return an auto-approval
+      if (!medication.requiresPA) {
+        return res.json({
+          decision: "APPROVED",
+          confidence: 1.0,
+          rationale: "This medication does not require prior authorization according to the formulary.",
+          missingInformation: [],
+          suggestedAlternatives: []
+        });
+      }
+      
+      // Extract patient info from the request
+      const patientInfo = {
+        age: paRequest.patientAge,
+        gender: paRequest.patientGender,
+        diagnosisCode: paRequest.diagnosisCode,
+        dosage: paRequest.dosage,
+        quantity: paRequest.quantity
+      };
+      
+      // Use the AI service to analyze the PA request
+      const decision = await aiService.analyzePARequest(medication, patientInfo);
+      
+      // Return the decision
+      res.json(decision);
+    } catch (error) {
+      console.error('PA analysis error:', error);
+      res.status(500).json({ 
+        message: 'Error analyzing prior authorization request',
+        decision: "NEEDS_REVIEW",
+        confidence: 0,
+        rationale: "An error occurred during the automated analysis. Please submit for manual review.",
+        missingInformation: ["Technical error occurred"],
+        suggestedAlternatives: []
+      });
     }
   });
 
