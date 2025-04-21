@@ -43,6 +43,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Error fetching drug classes' });
     }
   });
+  
+  app.get('/api/formularies', async (_req: Request, res: Response) => {
+    try {
+      const formularies = await storage.getFormularies();
+      res.json(formularies);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching formularies' });
+    }
+  });
 
   app.post('/api/search', async (req: Request, res: Response) => {
     try {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,17 +21,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, ChevronDown, ChevronUp, FileText, Filter, Calendar, TabletSmartphone, Pill } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, FileText, Filter, Calendar, TabletSmartphone, Pill, Book } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 
 interface SearchFormProps {
   drugClasses: string[];
   onSearch: (query: SearchQuery) => void;
   onCategorySearch: (category: string) => void;
+}
+
+// Formulary type
+interface Formulary {
+  id: number;
+  name: string;
+  provider?: string;
+  year?: number;
+  description?: string;
 }
 
 // Updated schema with more required fields for better PA determination
@@ -46,8 +56,13 @@ const formSchema = z.object({
 });
 
 export default function SearchForm({ drugClasses, onSearch, onCategorySearch }: SearchFormProps) {
-  const [activeTab, setActiveTab] = useState<string>("quick");
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("advanced"); // Make advanced search the default
+  const [showAdvanced, setShowAdvanced] = useState(true); // Show advanced options by default
+
+  // Fetch available formularies
+  const { data: formularies = [] } = useQuery<Formulary[]>({
+    queryKey: ['/api/formularies'],
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
