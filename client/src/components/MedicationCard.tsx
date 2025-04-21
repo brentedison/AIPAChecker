@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Medication } from "@shared/schema";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CircleAlert, AlertCircle, ArrowRight, FileText } from "lucide-react";
+import { CircleAlert, AlertCircle, ArrowRight, FileText, Brain, Bot, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import AIPADecision from "./AIPADecision";
 
 interface MedicationCardProps {
   medication: Medication;
@@ -14,6 +15,15 @@ interface MedicationCardProps {
 
 export default function MedicationCard({ medication }: MedicationCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showAIDecision, setShowAIDecision] = useState(false);
+  const [patientInfo, setPatientInfo] = useState({
+    formularyId: medication.formularyId,
+    age: undefined as number | undefined,
+    gender: undefined as string | undefined,
+    diagnosisCode: undefined as string | undefined,
+    dosage: undefined as string | undefined,
+    quantity: undefined as number | undefined,
+  });
 
   const getBorderColor = () => {
     switch (medication.formularyStatus) {
@@ -257,6 +267,34 @@ export default function MedicationCard({ medication }: MedicationCardProps) {
               )}
             </TabsContent>
           </Tabs>
+          
+          {medication.requiresPA && (
+            <>
+              <Separator className="my-4" />
+              
+              <div className="flex justify-center">
+                <Button 
+                  onClick={() => setShowAIDecision(true)}
+                  className="bg-[#0078D4] hover:bg-[#106EBE] text-white flex items-center gap-2"
+                >
+                  <Brain className="h-4 w-4" />
+                  AI-Powered Prior Authorization Determination
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      
+      {showAIDecision && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <AIPADecision 
+              medication={medication}
+              patientInfo={patientInfo}
+              onDismiss={() => setShowAIDecision(false)}
+            />
+          </div>
         </div>
       )}
     </Card>
