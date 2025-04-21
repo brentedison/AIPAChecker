@@ -63,9 +63,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Handle GET search with query parameters
       const query = {
+        formularyId: req.query.formularyId ? parseInt(req.query.formularyId as string) : 1, // Default to formulary ID 1
         medicationName: req.query.medicationName as string | undefined,
         drugClass: req.query.drugClass as string | undefined,
         patientAge: req.query.patientAge ? parseInt(req.query.patientAge as string) : undefined,
+        patientGender: req.query.patientGender as 'male' | 'female' | 'other' | undefined,
         dosage: req.query.dosage as string | undefined,
         quantity: req.query.quantity ? parseInt(req.query.quantity as string) : undefined,
         requiresPA: req.query.requiresPA === 'true' ? true : 
@@ -81,6 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await storage.searchMedications(parseResult.data);
       res.json(results);
     } catch (error) {
+      console.error('Search error:', error);
       res.status(500).json({ message: 'Error searching medications' });
     }
   });

@@ -1,0 +1,69 @@
+Here are the proposed answers to the clarifying questions, outlining an iterative product strategy:
+
+1. Core Functionality:
+
+Specific Tasks for AI Automation:
+
+MVP:
+
+Formulary & PA check.
+
+Display applicable PA criteria (QL, ST, AGE).
+
+Suggest preferred alternatives.
+
+Future Roadmap:
+
+Data extraction (EHR integration).
+
+PA form pre-filling.
+
+Approval prediction (ML).
+
+E-submission integration.
+
+Handling Complex Rules (MVP Focus):
+
+ST: Flag ST requirement & list prerequisites. (Future: Verify med history via integration).
+
+QL: Check against QL & flag exceedances.
+
+AGE/AGE*: Check patient age against rules (incl. tables) & flag.
+
+EA: Identify EA eligibility & display codes/criteria.
+
+Excluded/Carved-Out: Identify & advise user (e.g., direct to FFS).
+
+Opioid/Methadone: Flag policy applicability, calculate MME, link to requirements.
+
+2. Data & Integration:
+
+Patient Information Input (MVP): Manual entry of structured data: Patient DOB, Requested Medication (NDC preferred), Dosage, Frequency, Quantity, Primary Diagnosis (ICD-10).
+
+Information Provision (MVP): Manual entry via a secure web interface. (Future: EHR integration).
+
+Formulary Data:
+
+Format: MVP requires structured formulary data (DB, API, or consistent file). PDF processing is unreliable. Securing structured data is Priority #1.
+
+Updates: MVP: Process for regular structured file ingestion. (Future: API integration).
+
+Output (MVP): Clear, on-screen summary: Formulary status, PA required (Y/N), Applicable criteria, Suggested alternatives, Links to relevant policies/forms.
+
+3. Users & Technology:
+
+Users (MVP): Prescribing clinicians and delegated staff (MAs, Nurses, Pharm Techs).
+
+AI Type (MVP): Rule-Based Engine using structured formulary data. (Future: NLP for note extraction, ML for prediction - data dependent).
+
+Agentic AI Capabilities: MVP: No autonomous agent actions. Future Roadmap: Phased approach: 1) Agent-assisted data gathering (requires human oversight). 2) Potential autonomous form-filling/submission (requires high confidence, robust integrations, human approval, regulatory review).
+
+Technical Environment (MVP): Secure, standalone web application, designed with future API capabilities.
+
+4. Goal & Scope:
+
+Primary Goal (MVP): Reduce staff research time for formulary/PA rules, improve accuracy of initial checks, guide towards formulary compliance.
+
+Scope (Initial): These answers define the MVP scope. Next step: Refine into detailed specifications and user stories.
+
+This approach prioritizes delivering core value quickly by focusing on accurate information retrieval and guidance based on the formulary rules, while setting the stage for more advanced automation in future iterations.

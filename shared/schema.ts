@@ -199,7 +199,7 @@ export const medicationAlternativesRelations = relations(medicationAlternatives,
 
 // Search query schema
 export const searchQuerySchema = z.object({
-  formularyId: z.number(),
+  formularyId: z.number().default(1), // Default to first formulary
   medicationName: z.string().optional(),
   drugClass: z.string().optional(),
   patientAge: z.number().optional(),
