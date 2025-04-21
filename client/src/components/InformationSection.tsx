@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ExternalLink } from "lucide-react";
 
 export default function InformationSection() {
   return (
@@ -11,18 +11,16 @@ export default function InformationSection() {
           <div>
             <h3 className="text-lg font-medium text-neutral-800 mb-3 font-inter">Submission Process</h3>
             <div className="prose text-neutral-700 text-sm">
-              <p className="mb-2">When Prior Authorization is required, submit requests through one of these methods:</p>
+              <p className="mb-2">When Prior Authorization is required, submit requests through the methods specific to the selected formulary:</p>
               <ul className="list-disc ml-5 space-y-1">
-                <li>Fax completed form to: (800) 869-7791</li>
-                <li>Online submission via Molina Provider Portal</li>
-                <li>Phone: Contact Pharmacy Services at (800) XXX-XXXX</li>
+                <li>Complete and submit PA forms from the provider's website</li>
+                <li>Online submission via healthcare provider's portal</li>
+                <li>Phone or fax submission to pharmacy services</li>
+                <li>Electronic submission through EHR integrations</li>
               </ul>
               <p className="mt-3">
-                For more information on Prior Authorization, visit{" "}
-                <a href="https://www.molinahealthcare.com" className="text-[#0078D4] hover:underline">
-                  MolinaHealthcare.com
-                </a>
-                .
+                Submission details will be specific to the patient's insurance formulary. 
+                Check the selected formulary documentation for specific submission guidelines.
               </p>
             </div>
           </div>

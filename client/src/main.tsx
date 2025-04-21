@@ -4,12 +4,12 @@ import "./index.css";
 import { Toaster } from "@/components/ui/toaster";
 
 // Set document title
-document.title = "Molina Prior Authorization Checker";
+document.title = "Formulary Prior Authorization Checker";
 
 // Add meta description
 const metaDescription = document.createElement('meta');
 metaDescription.name = 'description';
-metaDescription.content = 'Check if medications require prior authorization based on Molina Washington Apple Health 2025 formulary';
+metaDescription.content = 'Check if medications require prior authorization across multiple formularies with detailed coverage information';
 document.head.appendChild(metaDescription);
 
 // Initialize the app
